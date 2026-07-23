@@ -29,6 +29,6 @@ test -f "$E2E/new_deploy_smoke.xlsx" && echo CREATE_OK=yes || { echo CREATE_OK=n
 curl -sS "${hdr[@]}" -d "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"excel_write_to_sheet\",\"arguments\":{\"fileAbsolutePath\":\"$E2E/probe_autocreate.xlsx\",\"sheetName\":\"Report\",\"newSheet\":false,\"range\":\"A1:A1\",\"values\":[[\"E2E_AUTOCREATE_OK\"]]}}}" http://127.0.0.1:3003/mcp >/dev/null
 test -f "$E2E/probe_autocreate.xlsx" && echo WRITE_OK=yes || { echo WRITE_OK=no; exit 1; }
 
-DESC=$(curl -sS "${hdr[@]}" -d "{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"excel_describe_sheets\",\"arguments\":{\"fileAbsolutePath\":\"$E2E/probe_autocreate.xlsx\"}}}")
+DESC=$(curl -sS "${hdr[@]}" -d "{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"excel_describe_sheets\",\"arguments\":{\"fileAbsolutePath\":\"$E2E/probe_autocreate.xlsx\"}}}" http://127.0.0.1:3003/mcp)
 echo "$DESC" | grep -q Report && echo DESC_HAS_Report=yes || { echo DESC_HAS_Report=no; exit 1; }
 echo SMOKE_PASS
