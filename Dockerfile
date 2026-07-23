@@ -1,10 +1,24 @@
+# Build from this fork's sources (HTTP-capable binary).
+FROM golang:1.24-bookworm AS build
 
-FROM node:20-slim AS release
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=docker" -o /out/excel-mcp-server ./cmd/excel-mcp-server
 
-# Set the working directory
+FROM gcr.io/distroless/static-debian12:nonroot
+
 WORKDIR /app
+COPY --from=build /out/excel-mcp-server /app/excel-mcp-server
 
-RUN npm install -g @negokaz/excel-mcp-server@0.12.0
+# Container-to-container MCP defaults.
+# EXCEL_MCP_HTTP_TOKEN must be provided at runtime (required for HTTP).
+ENV EXCEL_MCP_TRANSPORT=http \
+    EXCEL_MCP_HTTP_ADDR=:8080 \
+    EXCEL_MCP_HTTP_PATH=/mcp
 
-# Command to run the application
-ENTRYPOINT ["excel-mcp-server"]
+EXPOSE 8080
+
+USER nonroot:nonroot
+ENTRYPOINT ["/app/excel-mcp-server"]

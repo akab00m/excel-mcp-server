@@ -25,7 +25,45 @@ For more details, see the [tools](#tools) section.
 
 ## Requirements
 
-- Node.js 20.x or later
+- Node.js 20.x or later (for the npm launcher / stdio installs)
+- Or a Go build / Docker image for HTTP transport between containers
+
+## Transports
+
+| Transport | How to start | Typical use |
+|-----------|--------------|-------------|
+| **stdio** (default) | `npx @negokaz/excel-mcp-server` or binary with no flags | Local MCP clients (Claude Desktop, Cursor, etc.) |
+| **http** (Streamable HTTP) | `--transport http` or `EXCEL_MCP_TRANSPORT=http` | Agent container → Excel MCP container over the Docker network |
+
+HTTP endpoint defaults:
+
+- Listen: `:8080` (`EXCEL_MCP_HTTP_ADDR` / `--addr`)
+- Path: `/mcp` (`EXCEL_MCP_HTTP_PATH` / `--path`)
+- Health: `GET /healthz`
+- **Required auth:** `EXCEL_MCP_HTTP_TOKEN` must be set; clients send `Authorization: Bearer <token>` (HTTP refuses to start without it)
+
+Example (binary):
+
+```bash
+EXCEL_MCP_TRANSPORT=http EXCEL_MCP_HTTP_TOKEN=secret ./excel-mcp-server
+# MCP URL: http://localhost:8080/mcp
+```
+
+### Docker (HTTP for container-to-container)
+
+Build and run this fork:
+
+```bash
+docker build -t excel-mcp-server .
+docker run --rm -p 8080:8080 \
+  -e EXCEL_MCP_HTTP_TOKEN=secret \
+  -v /path/to/workbooks:/data \
+  excel-mcp-server
+```
+
+Point the agent MCP client at `http://excel-mcp:8080/mcp` (Docker Compose service name) with the same bearer token. Mount a **shared volume** so paths passed as `fileAbsolutePath` (e.g. `/data/book.xlsx`) exist inside the Excel MCP container.
+
+See `docker-compose.example.yml` for a two-service sketch.
 
 ## Supported file formats
 
@@ -186,6 +224,26 @@ You can change the MCP Server behaviors by the following environment variables:
 
 The maximum number of cells to read in a single paging operation.  
 [default: 4000]
+
+### `EXCEL_MCP_TRANSPORT`
+
+`stdio` (default) or `http`.
+
+### `EXCEL_MCP_HTTP_ADDR`
+
+HTTP listen address when transport is `http`.  
+[default: `:8080`]
+
+### `EXCEL_MCP_HTTP_PATH`
+
+HTTP path for the Streamable MCP endpoint.  
+[default: `/mcp`]
+
+### `EXCEL_MCP_HTTP_TOKEN`
+
+**Required** when `EXCEL_MCP_TRANSPORT=http`. MCP requests must include  
+`Authorization: Bearer <token>`. `/healthz` stays unauthenticated for probes.  
+The process exits on startup if this variable is missing or empty.
 
 ## License
 

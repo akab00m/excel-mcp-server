@@ -2,10 +2,11 @@
 
 ## Cursor Cloud specific instructions
 
-This repo is the **Excel MCP Server**: a Go binary that speaks the MCP protocol over **stdio** (no HTTP port, no database, no web UI), plus a thin TypeScript launcher (`dist/launcher.js`) that spawns the correct prebuilt Go binary. Standard commands live in `README.md` and `CLAUDE.md`; notes below are only the non-obvious caveats.
+This repo is the **Excel MCP Server**: a Go binary that speaks the MCP protocol over **stdio** (default) or **Streamable HTTP** (`--transport http` / `EXCEL_MCP_TRANSPORT=http`), plus a thin TypeScript launcher (`dist/launcher.js`) that spawns the correct prebuilt Go binary. Standard commands live in `README.md` and `CLAUDE.md`; notes below are only the non-obvious caveats.
 
 ### Services
-There is only one "service": the MCP server process, driven over stdin/stdout by an MCP client. It is not a long-running network service. On Linux it uses the cross-platform `excelize` backend; the Windows-only OLE live-editing and `excel_screen_capture` features cannot run here.
+- **stdio**: local MCP clients spawn the process; no network port.
+- **http**: listens on `EXCEL_MCP_HTTP_ADDR` (default `:8080`), MCP at `EXCEL_MCP_HTTP_PATH` (default `/mcp`), liveness at `/healthz`. **`EXCEL_MCP_HTTP_TOKEN` is required** (Bearer on MCP requests; `/healthz` open). Docker image defaults to HTTP for container-to-container use. On Linux it uses the cross-platform `excelize` backend; the Windows-only OLE live-editing and `excel_screen_capture` features cannot run here.
 
 ### Build / run caveats
 - `npm run build` runs `goreleaser build --snapshot --clean && tsc`. `goreleaser` (v2) is required and is installed at `~/go/bin` (on `PATH` via `~/.bashrc`), not via `npm -g` (the npm global prefix is root-owned `/` and fails). If `goreleaser` is missing, install with `go install github.com/goreleaser/goreleaser/v2@latest`.
