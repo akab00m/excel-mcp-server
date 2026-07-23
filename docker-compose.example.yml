@@ -1,13 +1,22 @@
 # Example: agent container talks to Excel MCP over Streamable HTTP.
-# Excel files must live on a volume mounted into the excel-mcp service;
-# pass those absolute paths as fileAbsolutePath (e.g. /data/book.xlsx).
+#
+# Path identity: fileAbsolutePath must resolve to the same absolute path in
+# both the agent and excel-mcp. Mount whatever directory the agent uses at the
+# *same absolute path* here (neutral default: /data).
 #
 # EXCEL_MCP_HTTP_TOKEN is required (compose fails if unset):
 #   export EXCEL_MCP_HTTP_TOKEN=$(openssl rand -hex 32)
+#
+# Bind-mount ./data (not a named volume) so UID 1000 can write without an
+# init/chown step. Create the dir on the host first: mkdir -p data
+#
+# Match the agent process UID/GID so the shared volume is writable:
+#   EXCEL_MCP_UID=1000 EXCEL_MCP_GID=1000
 
 services:
   excel-mcp:
     build: .
+    user: "${EXCEL_MCP_UID:-1000}:${EXCEL_MCP_GID:-1000}"
     environment:
       EXCEL_MCP_TRANSPORT: http
       EXCEL_MCP_HTTP_ADDR: ":8080"
@@ -15,20 +24,18 @@ services:
       EXCEL_MCP_HTTP_TOKEN: ${EXCEL_MCP_HTTP_TOKEN:?set EXCEL_MCP_HTTP_TOKEN}
       EXCEL_MCP_PAGING_CELLS_LIMIT: "4000"
     volumes:
-      - workbook-data:/data
+      - ./data:/data
     expose:
       - "8080"
 
   # Replace with your real agent image/config.
   agent:
     image: your-agent-image:latest
+    user: "${EXCEL_MCP_UID:-1000}:${EXCEL_MCP_GID:-1000}"
     environment:
       EXCEL_MCP_URL: http://excel-mcp:8080/mcp
       EXCEL_MCP_HTTP_TOKEN: ${EXCEL_MCP_HTTP_TOKEN:?set EXCEL_MCP_HTTP_TOKEN}
     volumes:
-      - workbook-data:/data
+      - ./data:/data
     depends_on:
       - excel-mcp
-
-volumes:
-  workbook-data:

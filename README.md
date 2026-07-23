@@ -56,12 +56,17 @@ Build and run this fork:
 ```bash
 docker build -t excel-mcp-server .
 docker run --rm -p 8080:8080 \
+  --user 1000:1000 \
   -e EXCEL_MCP_HTTP_TOKEN=secret \
   -v /path/to/workbooks:/data \
   excel-mcp-server
 ```
 
-Point the agent MCP client at `http://excel-mcp:8080/mcp` (Docker Compose service name) with the same bearer token. Mount a **shared volume** so paths passed as `fileAbsolutePath` (e.g. `/data/book.xlsx`) exist inside the Excel MCP container.
+Point the agent MCP client at `http://excel-mcp:8080/mcp` (Docker Compose service name) with the same bearer token.
+
+#### Shared volume / path identity
+
+`fileAbsolutePath` is resolved **inside the excel-mcp process**. If the agent runs in another container, mount the same directory at the **same absolute path** in both places (example target: `/data`), and run excel-mcp as a UID/GID that can read/write that volume (`EXCEL_MCP_UID` / `EXCEL_MCP_GID` in `docker-compose.example.yml`, or `docker run --user`). The image defaults to `USER 1000:1000`. Prefer a host bind mount (compose uses `./data:/data`) over a named volume when running as non-root, so the process can write without a separate chown step. After a successful write/save, the file is immediately visible to the agent at that same path.
 
 See `docker-compose.example.yml` for a two-service sketch.
 
@@ -154,9 +159,19 @@ Read values from Excel sheet with pagination.
 - `range`
     - Range of cells to read in the Excel sheet (e.g., "A1:C10"). [default: first paging range]
 
+### `excel_create_workbook`
+
+Create a new empty Excel workbook.
+
+**Arguments:**
+- `fileAbsolutePath`
+    - Absolute path where the new workbook should be created (must not already exist)
+- `sheetName`
+    - Optional name for the first sheet
+
 ### `excel_write_to_sheet`
 
-Write values to the Excel sheet.
+Write values to the Excel sheet. Creates the workbook if the path does not exist.
 
 **Arguments:**
 - `fileAbsolutePath`

@@ -50,10 +50,12 @@ go vet ./...      # Vet Go code for issues
 MCP tools are implemented in `internal/tools/`:
 - `excel_describe_sheets` - List worksheets and metadata
 - `excel_read_sheet` - Read sheet data with pagination
-- `excel_write_to_sheet` - Write data to sheets
+- `excel_create_workbook` - Create a new empty workbook
+- `excel_write_to_sheet` - Write data to sheets (creates workbook if missing)
 - `excel_create_table` - Create Excel tables
 - `excel_copy_sheet` - Copy sheets between workbooks
 - `excel_screen_capture` - Windows-only screenshot functionality
+- `excel_format_range` - Apply cell styles
 
 ### Pagination System
 

@@ -29,7 +29,7 @@ func AddExcelCopySheetTool(server *server.MCPServer) {
 		mcp.WithDescription("Copy existing sheet to a new sheet"),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
-			mcp.Description("Absolute path to the Excel file"),
+			mcp.Description(FileAbsolutePathDescription),
 		),
 		mcp.WithString("srcSheetName",
 			mcp.Required(),

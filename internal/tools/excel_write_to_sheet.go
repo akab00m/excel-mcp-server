@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"os"
 
 	z "github.com/Oudwins/zog"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -30,10 +31,10 @@ var excelWriteToSheetArgumentsSchema = z.Struct(z.Shape{
 
 func AddExcelWriteToSheetTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_write_to_sheet",
-		mcp.WithDescription("Write values to the Excel sheet"),
+		mcp.WithDescription("Write values to the Excel sheet (creates the workbook if the path does not exist)"),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
-			mcp.Description("Absolute path to the Excel file"),
+			mcp.Description(FileAbsolutePathDescription),
 		),
 		mcp.WithString("sheetName",
 			mcp.Required(),
@@ -98,6 +99,21 @@ func handleWriteToSheet(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 }
 
 func writeSheet(fileAbsolutePath string, sheetName string, newSheet bool, rangeStr string, values [][]any) (*mcp.CallToolResult, error) {
+	if _, err := os.Stat(fileAbsolutePath); os.IsNotExist(err) {
+		// When creating a new workbook for an existing-sheet write, name the
+		// first sheet as requested. For newSheet=true keep the default sheet
+		// and create sheetName below via CreateNewSheet.
+		createSheetName := sheetName
+		if newSheet {
+			createSheetName = ""
+		}
+		if createErr := excel.CreateFile(fileAbsolutePath, createSheetName); createErr != nil {
+			return nil, createErr
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
 	workbook, closeFn, err := excel.OpenFile(fileAbsolutePath)
 	if err != nil {
 		return nil, err

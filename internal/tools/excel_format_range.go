@@ -59,7 +59,7 @@ func AddExcelFormatRangeTool(server *server.MCPServer) {
 		mcp.WithDescription("Format cells in the Excel sheet with style information"),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
-			mcp.Description("Absolute path to the Excel file"),
+			mcp.Description(FileAbsolutePathDescription),
 		),
 		mcp.WithString("sheetName",
 			mcp.Required(),

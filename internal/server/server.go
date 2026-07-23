@@ -36,6 +36,7 @@ func New(version string) *ExcelServer {
 	if runtime.GOOS == "windows" {
 		tools.AddExcelScreenCaptureTool(s.server)
 	}
+	tools.AddExcelCreateWorkbookTool(s.server)
 	tools.AddExcelWriteToSheetTool(s.server)
 	tools.AddExcelCreateTableTool(s.server)
 	tools.AddExcelCopySheetTool(s.server)

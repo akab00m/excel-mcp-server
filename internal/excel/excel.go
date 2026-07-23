@@ -1,6 +1,11 @@
 package excel
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/xuri/excelize/v2"
 )
 
@@ -103,12 +108,73 @@ func OpenFile(absoluteFilePath string) (Excel, func(), error) {
 	// If OLE fails, try Excelize
 	workbook, err := excelize.OpenFile(absoluteFilePath)
 	if err != nil {
-		return nil, func() {}, err
+		return nil, func() {}, wrapOpenError(absoluteFilePath, err)
 	}
-	excelize := NewExcelizeExcel(workbook)
-	return excelize, func() {
+	backend := NewExcelizeExcel(workbook)
+	return backend, func() {
 		workbook.Close()
 	}, nil
+}
+
+// CreateFile creates a new empty workbook at absoluteFilePath.
+// Parent directories are created as needed. Fails if the path already exists.
+// If sheetName is non-empty, the first sheet is renamed to sheetName.
+func CreateFile(absoluteFilePath string, sheetName string) error {
+	if !filepath.IsAbs(absoluteFilePath) {
+		return fmt.Errorf("path %q is not absolute", absoluteFilePath)
+	}
+	if _, err := os.Stat(absoluteFilePath); err == nil {
+		return fmt.Errorf("file already exists: %s", absoluteFilePath)
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	dir := filepath.Dir(absoluteFilePath)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("create parent directory %q: %w", dir, err)
+	}
+	f := excelize.NewFile()
+	defer func() { _ = f.Close() }()
+	if sheetName != "" {
+		sheets := f.GetSheetList()
+		if len(sheets) == 0 {
+			return fmt.Errorf("new workbook has no sheets")
+		}
+		if err := f.SetSheetName(sheets[0], sheetName); err != nil {
+			return fmt.Errorf("set sheet name %q: %w", sheetName, err)
+		}
+	}
+	if err := f.SaveAs(absoluteFilePath); err != nil {
+		return fmt.Errorf("create workbook %q: %w", absoluteFilePath, err)
+	}
+	return nil
+}
+
+// OpenFileOrCreate opens absoluteFilePath, creating an empty workbook first if missing.
+func OpenFileOrCreate(absoluteFilePath string) (Excel, func(), error) {
+	_, err := os.Stat(absoluteFilePath)
+	if os.IsNotExist(err) {
+		if createErr := CreateFile(absoluteFilePath, ""); createErr != nil {
+			return nil, func() {}, createErr
+		}
+	} else if err != nil {
+		return nil, func() {}, err
+	}
+	return OpenFile(absoluteFilePath)
+}
+
+func wrapOpenError(path string, err error) error {
+	if err == nil {
+		return nil
+	}
+	if os.IsNotExist(err) {
+		return fmt.Errorf("%w: path %q not found; mount the same absolute path into this process as the agent uses (shared volume), e.g. /data/book.xlsx", err, path)
+	}
+	// excelize may return a plain string error; still hint on common missing-file text.
+	msg := err.Error()
+	if strings.Contains(msg, "no such file") || strings.Contains(msg, "cannot find the file") {
+		return fmt.Errorf("%w: path %q not found; mount the same absolute path into this process as the agent uses (shared volume), e.g. /data/book.xlsx", err, path)
+	}
+	return err
 }
 
 // BorderType represents border direction

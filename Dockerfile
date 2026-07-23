@@ -7,7 +7,9 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=docker" -o /out/excel-mcp-server ./cmd/excel-mcp-server
 
-FROM gcr.io/distroless/static-debian12:nonroot
+# Numeric non-root default; override with compose / docker run --user so the
+# process can read/write a shared volume owned by the agent user.
+FROM gcr.io/distroless/static-debian12
 
 WORKDIR /app
 COPY --from=build /out/excel-mcp-server /app/excel-mcp-server
@@ -20,5 +22,5 @@ ENV EXCEL_MCP_TRANSPORT=http \
 
 EXPOSE 8080
 
-USER nonroot:nonroot
+USER 1000:1000
 ENTRYPOINT ["/app/excel-mcp-server"]

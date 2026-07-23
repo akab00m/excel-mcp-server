@@ -28,7 +28,7 @@ func AddExcelScreenCaptureTool(server *server.MCPServer) {
 		mcp.WithDescription("[Windows only] Take a screenshot of the Excel sheet with pagination."),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
-			mcp.Description("Absolute path to the Excel file"),
+			mcp.Description(FileAbsolutePathDescription),
 		),
 		mcp.WithString("sheetName",
 			mcp.Required(),

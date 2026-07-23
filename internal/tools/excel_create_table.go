@@ -31,7 +31,7 @@ func AddExcelCreateTableTool(server *server.MCPServer) {
 		mcp.WithDescription("Create a table in the Excel sheet"),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
-			mcp.Description("Absolute path to the Excel file"),
+			mcp.Description(FileAbsolutePathDescription),
 		),
 		mcp.WithString("sheetName",
 			mcp.Required(),

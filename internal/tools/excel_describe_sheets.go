@@ -24,7 +24,7 @@ func AddExcelDescribeSheetsTool(server *server.MCPServer) {
 		mcp.WithDescription("List all sheet information of specified Excel file"),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
-			mcp.Description("Absolute path to the Excel file"),
+			mcp.Description(FileAbsolutePathDescription),
 		),
 	), handleDescribeSheets)
 }

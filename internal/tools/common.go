@@ -438,3 +438,6 @@ func AbsolutePathTest() z.Test[*string] {
 		},
 	}
 }
+
+// FileAbsolutePathDescription is the shared MCP argument description for workbook paths.
+const FileAbsolutePathDescription = "Absolute path to the Excel file as seen by this process (must exist on a volume shared with the agent at the same path)"

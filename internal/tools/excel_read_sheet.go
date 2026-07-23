@@ -33,7 +33,7 @@ func AddExcelReadSheetTool(server *server.MCPServer) {
 		mcp.WithDescription("Read values from Excel sheet with pagination."),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
-			mcp.Description("Absolute path to the Excel file"),
+			mcp.Description(FileAbsolutePathDescription),
 		),
 		mcp.WithString("sheetName",
 			mcp.Required(),
