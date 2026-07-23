@@ -12,7 +12,8 @@ FROM gcr.io/distroless/static-debian12:nonroot
 WORKDIR /app
 COPY --from=build /out/excel-mcp-server /app/excel-mcp-server
 
-# Container-to-container MCP defaults (override with env if needed).
+# Container-to-container MCP defaults.
+# EXCEL_MCP_HTTP_TOKEN must be provided at runtime (required for HTTP).
 ENV EXCEL_MCP_TRANSPORT=http \
     EXCEL_MCP_HTTP_ADDR=:8080 \
     EXCEL_MCP_HTTP_PATH=/mcp

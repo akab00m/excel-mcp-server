@@ -21,7 +21,7 @@ type HTTPConfig struct {
 	Addr string
 	// Path is the MCP endpoint path, e.g. "/mcp".
 	Path string
-	// Token, if non-empty, requires Authorization: Bearer <token> on MCP requests.
+	// Token is required for HTTP transport. Clients must send Authorization: Bearer <token>.
 	Token string
 }
 
@@ -47,9 +47,11 @@ func (s *ExcelServer) StartStdio() error {
 	return server.ServeStdio(s.server)
 }
 
-// StartHTTP serves the MCP Streamable HTTP transport for container-to-container use.
-// Default client URL: http://<host><addr-port><path> (e.g. http://excel-mcp:8080/mcp).
-func (s *ExcelServer) StartHTTP(cfg HTTPConfig) error {
+func normalizeHTTPConfig(cfg HTTPConfig) (HTTPConfig, error) {
+	cfg.Token = strings.TrimSpace(cfg.Token)
+	if cfg.Token == "" {
+		return cfg, fmt.Errorf("EXCEL_MCP_HTTP_TOKEN is required when transport=http")
+	}
 	if cfg.Addr == "" {
 		cfg.Addr = ":8080"
 	}
@@ -63,7 +65,12 @@ func (s *ExcelServer) StartHTTP(cfg HTTPConfig) error {
 	if cfg.Path == "" {
 		cfg.Path = "/mcp"
 	}
+	return cfg, nil
+}
 
+// newHTTPHandler builds the authenticated HTTP mux for MCP + healthz.
+// Token must already be validated via normalizeHTTPConfig.
+func (s *ExcelServer) newHTTPHandler(cfg HTTPConfig) http.Handler {
 	mcpHandler := server.NewStreamableHTTPServer(s.server)
 
 	mux := http.NewServeMux()
@@ -78,12 +85,19 @@ func (s *ExcelServer) StartHTTP(cfg HTTPConfig) error {
 		_, _ = w.Write([]byte("ok"))
 	})
 
-	var handler http.Handler = mux
-	if cfg.Token != "" {
-		handler = bearerAuthMiddleware(cfg.Token, mux)
+	return bearerAuthMiddleware(cfg.Token, mux)
+}
+
+// StartHTTP serves the MCP Streamable HTTP transport for container-to-container use.
+// Bearer token auth is mandatory. Default client URL: http://host:8080/mcp.
+func (s *ExcelServer) StartHTTP(cfg HTTPConfig) error {
+	cfg, err := normalizeHTTPConfig(cfg)
+	if err != nil {
+		return err
 	}
 
-	log.Printf("excel-mcp-server listening on %s (MCP %s, healthz /healthz)", cfg.Addr, cfg.Path)
+	handler := s.newHTTPHandler(cfg)
+	log.Printf("excel-mcp-server listening on %s (MCP %s, healthz /healthz, bearer auth required)", cfg.Addr, cfg.Path)
 	return http.ListenAndServe(cfg.Addr, handler)
 }
 

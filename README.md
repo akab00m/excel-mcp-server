@@ -40,7 +40,7 @@ HTTP endpoint defaults:
 - Listen: `:8080` (`EXCEL_MCP_HTTP_ADDR` / `--addr`)
 - Path: `/mcp` (`EXCEL_MCP_HTTP_PATH` / `--path`)
 - Health: `GET /healthz`
-- Optional auth: set `EXCEL_MCP_HTTP_TOKEN`; clients must send `Authorization: Bearer <token>`
+- **Required auth:** `EXCEL_MCP_HTTP_TOKEN` must be set; clients send `Authorization: Bearer <token>` (HTTP refuses to start without it)
 
 Example (binary):
 
@@ -241,8 +241,9 @@ HTTP path for the Streamable MCP endpoint.
 
 ### `EXCEL_MCP_HTTP_TOKEN`
 
-Optional bearer token. When set, MCP requests (not `/healthz`) require  
-`Authorization: Bearer <token>`.
+**Required** when `EXCEL_MCP_TRANSPORT=http`. MCP requests must include  
+`Authorization: Bearer <token>`. `/healthz` stays unauthenticated for probes.  
+The process exits on startup if this variable is missing or empty.
 
 ## License
 

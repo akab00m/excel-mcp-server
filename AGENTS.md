@@ -6,7 +6,7 @@ This repo is the **Excel MCP Server**: a Go binary that speaks the MCP protocol 
 
 ### Services
 - **stdio**: local MCP clients spawn the process; no network port.
-- **http**: listens on `EXCEL_MCP_HTTP_ADDR` (default `:8080`), MCP at `EXCEL_MCP_HTTP_PATH` (default `/mcp`), liveness at `/healthz`. Optional `EXCEL_MCP_HTTP_TOKEN` (Bearer). Docker image defaults to HTTP for container-to-container use. On Linux it uses the cross-platform `excelize` backend; the Windows-only OLE live-editing and `excel_screen_capture` features cannot run here.
+- **http**: listens on `EXCEL_MCP_HTTP_ADDR` (default `:8080`), MCP at `EXCEL_MCP_HTTP_PATH` (default `/mcp`), liveness at `/healthz`. **`EXCEL_MCP_HTTP_TOKEN` is required** (Bearer on MCP requests; `/healthz` open). Docker image defaults to HTTP for container-to-container use. On Linux it uses the cross-platform `excelize` backend; the Windows-only OLE live-editing and `excel_screen_capture` features cannot run here.
 
 ### Build / run caveats
 - `npm run build` runs `goreleaser build --snapshot --clean && tsc`. `goreleaser` (v2) is required and is installed at `~/go/bin` (on `PATH` via `~/.bashrc`), not via `npm -g` (the npm global prefix is root-owned `/` and fails). If `goreleaser` is missing, install with `go install github.com/goreleaser/goreleaser/v2@latest`.
