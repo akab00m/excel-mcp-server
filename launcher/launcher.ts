@@ -23,6 +23,7 @@ function getBinaryPath(): string {
   }
 }
 
-childProcess.execFileSync(getBinaryPath(), process.argv, {
+// Pass only user args (not node/script paths) through to the Go binary.
+childProcess.execFileSync(getBinaryPath(), process.argv.slice(2), {
   stdio: 'inherit',
 });

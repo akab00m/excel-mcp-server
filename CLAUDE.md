@@ -41,8 +41,9 @@ go vet ./...      # Vet Go code for issues
 - `Tool` interface in `internal/tools/` - MCP tool implementations
 
 **Entry Points**:
-- `cmd/excel-mcp-server/main.go` - Go binary entry point
+- `cmd/excel-mcp-server/main.go` - Go binary entry point (`--transport stdio|http`)
 - `launcher/launcher.ts` - Cross-platform launcher that selects appropriate binary
+- `Dockerfile` - HTTP-oriented image for Docker (defaults `EXCEL_MCP_TRANSPORT=http`)
 
 ### Tool System
 
@@ -98,6 +99,10 @@ TypeScript launcher is compiled to `dist/launcher.js` and published to NPM.
 
 Environment variables:
 - `EXCEL_MCP_PAGING_CELLS_LIMIT` - Maximum cells per page (default: 4000)
+- `EXCEL_MCP_TRANSPORT` - `stdio` (default) or `http`
+- `EXCEL_MCP_HTTP_ADDR` - Listen address for HTTP transport (default: `:8080`)
+- `EXCEL_MCP_HTTP_PATH` - MCP endpoint path (default: `/mcp`)
+- `EXCEL_MCP_HTTP_TOKEN` - Optional Bearer token for HTTP MCP requests
 
 ## Dependencies
 
