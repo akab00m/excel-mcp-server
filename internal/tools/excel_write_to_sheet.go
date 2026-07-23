@@ -32,6 +32,10 @@ var excelWriteToSheetArgumentsSchema = z.Struct(z.Shape{
 func AddExcelWriteToSheetTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_write_to_sheet",
 		mcp.WithDescription("Write values to the Excel sheet (creates the workbook if the path does not exist)"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(false),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
 			mcp.Description(FileAbsolutePathDescription),

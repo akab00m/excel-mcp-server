@@ -26,6 +26,10 @@ var ExcelScreenCaptureArgumentsSchema = z.Struct(z.Shape{
 func AddExcelScreenCaptureTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_screen_capture",
 		mcp.WithDescription("[Windows only] Take a screenshot of the Excel sheet with pagination."),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
 			mcp.Description(FileAbsolutePathDescription),

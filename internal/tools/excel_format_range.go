@@ -57,6 +57,10 @@ var excelFormatRangeArgumentsSchema = z.Struct(z.Shape{
 func AddExcelFormatRangeTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_format_range",
 		mcp.WithDescription("Format cells in the Excel sheet with style information"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(false),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
 			mcp.Description(FileAbsolutePathDescription),

@@ -29,6 +29,10 @@ var excelCreateTableArgumentsSchema = z.Struct(z.Shape{
 func AddExcelCreateTableTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_create_table",
 		mcp.WithDescription("Create a table in the Excel sheet"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(false),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
 			mcp.Description(FileAbsolutePathDescription),

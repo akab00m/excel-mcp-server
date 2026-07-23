@@ -24,6 +24,10 @@ var excelCreateWorkbookArgumentsSchema = z.Struct(z.Shape{
 func AddExcelCreateWorkbookTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_create_workbook",
 		mcp.WithDescription("Create a new empty Excel workbook at the given path (fails if the file already exists)"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(false),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
 			mcp.Description(FileAbsolutePathDescription),

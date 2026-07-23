@@ -22,6 +22,10 @@ var excelDescribeSheetsArgumentsSchema = z.Struct(z.Shape{
 func AddExcelDescribeSheetsTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_describe_sheets",
 		mcp.WithDescription("List all sheet information of specified Excel file"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
 			mcp.Description(FileAbsolutePathDescription),

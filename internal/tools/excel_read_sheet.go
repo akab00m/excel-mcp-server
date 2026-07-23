@@ -31,6 +31,10 @@ var excelReadSheetArgumentsSchema = z.Struct(z.Shape{
 func AddExcelReadSheetTool(server *server.MCPServer) {
 	server.AddTool(mcp.NewTool("excel_read_sheet",
 		mcp.WithDescription("Read values from Excel sheet with pagination."),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("fileAbsolutePath",
 			mcp.Required(),
 			mcp.Description(FileAbsolutePathDescription),
