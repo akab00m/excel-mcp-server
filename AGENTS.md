@@ -1,4 +1,13 @@
-# AGENTS.md
+## Деплой на cathalina
+
+Только CLI `C:\Users\Altin\Documents\Production\cathalina-deploy`. Справочник: `C:\Users\Altin\Documents\Production\cathalina-deploy\AGENTS.md`.
+id в каталоге: `excel-mcp`
+
+```
+python C:\Users\Altin\Documents\Production\cathalina-deploy\cathalina.py deploy excel-mcp
+```
+
+Не scp в /tmp, не /opt, не свой deploy.sh. Вне CLI — те же инварианты гигиены (справочник §12).
 
 ## Cursor Cloud specific instructions
 
