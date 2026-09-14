@@ -27,3 +27,14 @@ This repo is the **Excel MCP Server**: a Go binary that speaks the MCP protocol 
 - `gofmt -l .` flags `internal/excel/pagination.go` (pre-existing); leave it as-is.
 - `excel.OpenFile` opens an existing workbook. Use `excel_create_workbook` or `excel_write_to_sheet` (auto-creates if missing) for new files.
 - End-to-end smoke test: pipe line-delimited JSON-RPC into `node dist/launcher.js` (or the raw binary). Keep stdin open until responses arrive — closing stdin immediately (a plain `cat file | ...` pipe) can EOF the server before `tools/call` responses flush. A Node child-process driver that awaits each response works reliably.
+
+## Runtime & docs conventions
+
+- Никакого Python для постоянно работающих сервисов. Одноразовые скрипты — допустимо; сервисы — Go или Rust.
+- `.sh` — для разовой настройки, не для сервисов. Периодические задачи (cron) — Python; долгоживущие сервисы — Go/Rust.
+- Только контейнеры и оркестрация: простота и скорость развёртывания в любом окружении.
+- В `docker-compose` обязательно YAML-anchors для повторяющихся частей; не раздувать файл.
+- Где возможно — динамическая конфигурация (без рестарта сервисов при смене настроек).
+- Скрипт, сервис, изменение на хосте или установка пакета — описать в `README.md` **соответствующей** папки. Корневой `README.md` — только общепроектное.
+- Бекенд - Go или Rust, фронт - Phoenix.
+- Вышестоящие правила применяются если их применение допустимо.
