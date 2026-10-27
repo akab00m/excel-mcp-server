@@ -1,13 +1,14 @@
 # Build binary from fork sources
-FROM golang:1.24-bookworm AS build
+FROM golang:1.26.10-bookworm@sha256:632dff7351799a5a9954a48dc06670ade72ee44e8c351cdc0e5a57af2fea21af AS build
 WORKDIR /src
 COPY go.mod go.sum ./
+ENV GOTOOLCHAIN=local
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=docker" -o /out/excel-mcp-server ./cmd/excel-mcp-server
 
 # Runtime: alpine so healthcheck works; run as agent UID
-FROM alpine:3.21
+FROM alpine:3.21@sha256:ee16d92f96db08d9d2d07da48555a27f3a69d8f0759021dbc601195ed0d2b5bd
 RUN apk add --no-cache ca-certificates wget \
  && addgroup -g 1000 app && adduser -D -u 1000 -G app app \
  && mkdir -p /home/cursor-bridge/projects/cursor-cli-bridge/workspace \
